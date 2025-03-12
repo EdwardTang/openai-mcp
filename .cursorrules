@@ -1,0 +1,41 @@
+# MCP Project Development Rules
+
+## Core Development Practices
+
+### Directory Navigation
+- ALWAYS check the current directory with `pwd` before performing any action
+- Ensure you're in the correct directory path before executing commands
+- Use absolute paths when necessary to avoid confusion
+- Document directory changes in comments or commit messages
+
+### Virtual Environment
+- ALL development MUST be performed within the `venv` virtual environment
+- Activate the environment with: `source venv/bin/activate`
+- Verify environment activation by checking for `(venv)` prefix in terminal prompt
+- Install all dependencies within the virtual environment
+- When adding new dependencies, update requirements.txt: `pip freeze > requirements.txt`
+
+### Python Version Requirements
+- This project requires Python 3.10+ as specified by dependencies
+- Currently using Python 3.10 for the virtual environment
+- Check Python version with `python --version` before development
+
+### Code Quality
+- Run tests before committing changes
+- Follow PEP 8 guidelines for Python code
+- Document functions, classes, and complex code blocks
+- Use type hints where appropriate
+
+### Version Control
+- Commit messages should be clear and descriptive
+- Create feature branches for new functionality
+- Pull latest changes before starting work
+- Resolve conflicts promptly
+
+### Environment Variables
+- Store sensitive information in .env files (not in git)
+- Document required environment variables
+
+## Reminders
+- The main MCP server can be run with `python cli.py mcp-serve`
+- For development mode: `python cli.py mcp-serve --dev` 
