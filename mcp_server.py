@@ -382,7 +382,7 @@ class MCPServer:
                 "uptime": uptime_str,
                 "request_count": self.request_count,
                 "cache_hit_ratio": round(cache_hit_ratio, 2),
-                "models": ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"],
+                "models": ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo", "o1"],
                 "templates": templates
             })
         
@@ -683,7 +683,8 @@ class MCPServer:
                         "name": "GPT-4o",
                         "description": "OpenAI's most advanced model",
                         "context_length": 128000,
-                        "is_default": True
+                        "is_default": False,
+                        "features": ["function_calling", "web_search", "vision"]
                     },
                     {
                         "id": "gpt-4-turbo",
@@ -697,15 +698,15 @@ class MCPServer:
                         "name": "GPT-3.5 Turbo",
                         "description": "Fast and efficient model",
                         "context_length": 16385,
-                        "is_default": False
+                        "is_default": False,
                     },
                     {
                         "id": "o1",
                         "name": "o1",
                         "description": "OpenAI's reasoning-focused model with advanced capabilities",
                         "context_length": 128000,
-                        "is_default": False,
-                        "features": ["reasoning_effort", "web_search"]
+                        "is_default": True,
+                        "features": ["reasoning_effort", "web_search", "function_calling"]
                     },
                     {
                         "id": "o1-mini",
@@ -713,7 +714,7 @@ class MCPServer:
                         "description": "Smaller and faster version of the o1 model",
                         "context_length": 128000,
                         "is_default": False,
-                        "features": ["reasoning_effort", "web_search"]
+                        "features": ["reasoning_effort", "web_search", "function_calling"]
                     }
                 ],
                 "count": 5
@@ -797,7 +798,7 @@ class MCPServer:
                         "description": "The current time"
                     }
                 },
-                "default_model": "gpt-4o",
+                "default_model": "o1",
                 "metadata": {
                     "category": "general"
                 }
@@ -819,7 +820,7 @@ class MCPServer:
                         "description": "Areas to focus on during review (e.g., 'performance, security')"
                     }
                 },
-                "default_model": "gpt-4o",
+                "default_model": "o1",
                 "use_openai": True,
                 "system_prompt": "You are a code review expert. Analyze the provided code and provide constructive feedback focusing on the specified areas.",
                 "metadata": {
@@ -830,7 +831,7 @@ class MCPServer:
                 "template": "You are OpenAI Code Assistant, a CLI tool that helps users with software engineering tasks and general information.\nUse the available tools to assist the user with their requests.\n\n# Tone and style\nYou should be concise, direct, and to the point. When you run a non-trivial bash command, \nyou should explain what the command does and why you are running it.\nOutput text to communicate with the user; all text you output outside of tool use is displayed to the user.\nRemember that your output will be displayed on a command line interface.\n\n# Tool usage policy\n- When doing file search, remember to search effectively with the available tools.\n- Always use the appropriate tool for the task.\n- Use parallel tool calls when appropriate to improve performance.\n- NEVER commit changes unless the user explicitly asks you to.\n- For weather queries, use the Weather tool to provide real-time information.\n\n# Tasks\nThe user will primarily request you perform software engineering tasks:\n1. Solving bugs\n2. Adding new functionality \n3. Refactoring code\n4. Explaining code\n5. Writing tests\n\nFor these tasks:\n1. Use search tools to understand the codebase\n2. Implement solutions using the available tools\n3. Verify solutions with tests if possible\n4. Run lint and typecheck commands when appropriate\n\nThe user may also ask for general information:\n1. Weather conditions\n2. Simple calculations\n3. General knowledge questions\n\n# Code style\n- Follow the existing code style of the project\n- Maintain consistent naming conventions\n- Use appropriate libraries that are already in the project\n- Add comments when code is complex or non-obvious\n\nIMPORTANT: You should minimize output tokens as much as possible while maintaining helpfulness, \nquality, and accuracy. Answer concisely with short lines of text unless the user asks for detail.",
                 "description": "System prompt for the assistant",
                 "parameters": {},
-                "default_model": "gpt-4o",
+                "default_model": "o1",
                 "metadata": {
                     "category": "system"
                 }
@@ -853,7 +854,7 @@ class MCPServer:
                         "default": "markdown"
                     }
                 },
-                "default_model": "gpt-4o",
+                "default_model": "o1",
                 "use_openai": True,
                 "system_prompt": "You are a technical documentation expert. Generate clear, concise, and accurate documentation for the provided code.",
                 "metadata": {
@@ -878,7 +879,7 @@ class MCPServer:
                         "default": "intermediate"
                     }
                 },
-                "default_model": "gpt-4o",
+                "default_model": "o1",
                 "use_openai": True,
                 "system_prompt": "You are a programming instructor. Explain the provided code clearly at the requested level of detail.",
                 "metadata": {
@@ -889,7 +890,7 @@ class MCPServer:
                 "template": "The current time is {{now:%Y-%m-%d %H:%M:%S}}.",
                 "description": "Get the current time",
                 "parameters": {},
-                "default_model": "gpt-4o",
+                "default_model": "o1",
                 "metadata": {
                     "category": "utility"
                 }
