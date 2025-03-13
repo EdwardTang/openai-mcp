@@ -566,6 +566,42 @@ def mcp_client(
     return client_execute(args)
 
 
+@app.command(name="serve")
+def serve(
+    host: str = typer.Option("127.0.0.1", "--host", help="Host address to bind to"),
+    port: int = typer.Option(8000, "--port", "-p", help="Port to listen on"),
+    dev_mode: bool = typer.Option(False, "--dev", help="Enable development mode with additional logging"),
+    dependencies: List[str] = typer.Option([], "--dependencies", help="Additional Python dependencies to install"),
+    env_file: str = typer.Option(None, "--env-file", help="Path to .env file with environment variables")
+):
+    """Start the Claude Code as an MCP (Model Context Protocol) server.
+
+    This allows other clients to connect to Claude Code and use it as a context provider,
+    enabling tools and functionality to be accessed remotely.
+    """
+    from claude_code.commands.serve import execute as serve_execute
+    import argparse
+    
+    # Show welcome message
+    console.print(Panel.fit(
+        f"[bold green]Claude Code Python Edition MCP Server v{VERSION}[/bold green]\n"
+        f"Host: {host}, Port: {port}",
+        title="MCP Server",
+        border_style="green"
+    ))
+    
+    # Create a namespace with the arguments
+    args = argparse.Namespace()
+    args.host = host
+    args.port = port
+    args.dev = dev_mode
+    args.dependencies = dependencies
+    args.env_file = env_file
+    
+    # Execute the serve command
+    return serve_execute(args)
+
+
 @app.command(name="mcp-multi-agent")
 def mcp_multi_agent(
     server_script: str = typer.Argument(..., help="Path to the server script (.py or .js)"),
