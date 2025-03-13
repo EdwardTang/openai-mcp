@@ -30,7 +30,8 @@ mcp = FastMCP(
     "Claude Code MCP Server",
     description="A Model Context Protocol server for Claude Code tools",
     dependencies=["fastmcp>=0.4.1", "openai", "pydantic"],
-    homepage_html_file=str(pathlib.Path(__file__).parent / "examples" / "claude_mcp_config.html")
+    homepage_html_file=str(pathlib.Path(__file__).parent / "examples" / "claude_mcp_config.html"),
+    lifespan="on"
 )
 
 # Initialize tool registry and manager
@@ -39,6 +40,10 @@ tool_manager = ToolExecutionManager(tool_registry)
 
 # Register file tools
 register_file_tools(tool_registry)
+
+# Configure server settings
+HOST = "127.0.0.1"  # localhost
+PORT = 8000
 
 
 def setup_tools():
@@ -298,21 +303,52 @@ async def get_server_metrics(metric_type: str = "all") -> str:
 
 
 # Add connection tracking
-@mcp.on_connect
 async def handle_connect(ctx: Context):
     """Track client connections."""
     client_id = str(uuid.uuid4())
+    
+    # Store client ID in context data
+    if not hasattr(ctx, 'client_data'):
+        ctx.client_data = {}
+    
     ctx.client_data["id"] = client_id
     metrics.log_connection(client_id, connected=True)
     logger.info(f"Client connected: {client_id}")
+    return client_id
 
 
-@mcp.on_disconnect
 async def handle_disconnect(ctx: Context):
     """Track client disconnections."""
-    client_id = ctx.client_data.get("id", "unknown")
+    client_id = ctx.client_data.get("id") if hasattr(ctx, "client_data") else "unknown"
     metrics.log_connection(client_id, connected=False)
     logger.info(f"Client disconnected: {client_id}")
+
+
+@mcp.tool(name="RegisterClient", description="Register a client connection with the server")
+async def register_client(ctx: Context) -> str:
+    """Register a client connection with the server.
+    
+    Returns:
+        A client ID for tracking
+    """
+    try:
+        # Log tool call
+        metrics.log_tool_call("RegisterClient")
+        
+        # Handle client connection
+        client_id = await handle_connect(ctx)
+        
+        # Setup disconnect handler
+        @ctx.on_close
+        async def on_close():
+            await handle_disconnect(ctx)
+        
+        return f"Client registered with ID: {client_id}"
+    except Exception as e:
+        # Log error in metrics
+        metrics.log_error("client_registration", str(e))
+        logger.error(f"Error registering client: {str(e)}")
+        return f"Error registering client: {str(e)}"
 
 
 @mcp.tool(name="GetConfiguration", description="Get Claude Desktop configuration for this MCP server")
@@ -391,8 +427,14 @@ def main():
     # Initialize the server
     server = initialize_server()
     
-    # Run the server
-    server.run()
+    try:
+        # Run the server with uvicorn
+        import uvicorn
+        logger.info(f"Starting MCP server on {HOST}:{PORT}")
+        uvicorn.run(server.app, host=HOST, port=PORT)
+    except Exception as e:
+        logger.error(f"Failed to start server: {str(e)}")
+        raise
 
 
 if __name__ == "__main__":
